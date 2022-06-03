@@ -5,7 +5,7 @@ A simple plugin for CMD cursor handling.
 
 ``cur.exe <command> <args..>``
 
-** The following commands are available:**
+**The following commands are available:**
 
 ``cur get`` - Returns X Y coordinates to STDOUT, **the coordinates returned is the point after the prompt, not on the prompt**
 
