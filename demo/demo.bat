@@ -26,11 +26,14 @@ echo I've cleared the screen for you.
 echo.
 echo Now, let's toggle the cursor blink:
 cur blink off
-echo You should see that there is no blinking cursor to the right of the prompt now.
+echo You should see that there is no blinking cursor to the right of the prompt now. Just a solid white cursor.
 pause
-echo Let's change the size of the blink to the full character cell (100)
-cur blink on 100
+echo Let's change the size of the cursor to a large one.
+cur size 100
 echo It should be huge now!
+pause
+echo Let's turn the blinking cursor back on.
+cur blink on
 pause
 echo This is the end of the demonstration.
 pause

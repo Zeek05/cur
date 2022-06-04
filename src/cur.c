@@ -28,7 +28,13 @@ void setCursor(int x, int y) {
 }
 
 // a function that enables/disables cursor blink
-void setCursorBlink(int enable, int dwSize) {
+void setCursorBlink(int enable) {
+    // use ansi escape to set the cursor blink state
+    printf("\033[?12%c", enable ? 'h' : 'l');
+    return;
+}
+
+void setCursorSize(int dwSize) {
     // if dwSize is 0 then set the cursor size to the default
     if (dwSize == 0) {
         dwSize = 25;
@@ -39,8 +45,14 @@ void setCursorBlink(int enable, int dwSize) {
     }
     CONSOLE_CURSOR_INFO cci;
     cci.dwSize = dwSize;
-    cci.bVisible = enable;
+    cci.bVisible = 1;
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cci);
+}
+
+void showHideCursor(int show) {
+    // use ansi escape to set the cursor visibility
+    printf("\033[?25%c", show ? 'h' : 'l');
+    return;
 }
 
 // help function
@@ -69,15 +81,25 @@ void doHelp() {
     printf("  get - get the current cursor position\n");
     printf("  set <x> <y> - set the cursor position\n");
     printf("  blink <on/off> <opt. size 0-100> - toggle the cursor blink \n");
+    printf("  size <size 0-100> - set the cursor size\n");
+    printf("  show <on/off> - toggle the cursor visibility\n");
     printf("  help - print this help message\n\n");
     printf("\x1b[41m\x1b[37mOther notes:\x1b[0m\n");
     printf("When getting the cursor position in the shell, the cursor position will be the position just below the prompt.\n");
     printf("If you specify an invalid number, it will default to 0.\n");
     printf("The console cursor size is not an exact. Some sizes display the same as others.\n");
+    printf("Adjusting the cursors size will turn the cursor back on.\n");
 
 
 }
 
+void enableVT() {
+    // enable VIRTUAL_TERMINAL_PROCESSING
+    DWORD mode;
+    GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &mode);
+    mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), mode);
+}
 
 // main function
 // takes in the commandline arguments and calls the appropriate functions
@@ -87,17 +109,22 @@ int main(int argc, char *argv[]) {
         doHelp();
         return 1;
     }
+
+    enableVT(); 
+
     // if the first argument is /? or -? or help then display the help function
     if (strcmp(argv[1], "/?") == 0 || strcmp(argv[1], "-?") == 0 || strcmp(argv[1], "help") == 0) {
         doHelp();
         return 0;
     }
+
     // if the first argument is get then get the cursor position and print it to stdout
     if (strcmp(argv[1], "get") == 0) {
         CUR cur = getCursor();
         printf("%d %d\n", cur.x, cur.y);
         return 0;
     }
+
     // if the first argument is set then set the cursor position
     if (strcmp(argv[1], "set") == 0) {
         // if there is not two arguments then display the help function
@@ -109,6 +136,7 @@ int main(int argc, char *argv[]) {
         setCursor(atoi(argv[2]), atoi(argv[3]));
         return 0;
     }
+
     // if the first argument is blink then toggle the cursor blink
     if (strcmp(argv[1], "blink") == 0) {
         // if there is not two arguments then display the help function
@@ -118,29 +146,53 @@ int main(int argc, char *argv[]) {
         }
         // if the second argument is on then enable the cursor blink
         if (strcmp(argv[2], "on") == 0) {
-            // if there is no third argument then set the cursor size to the default
-            if (argc < 4) {
-                setCursorBlink(1, 25);
-            }
-            // if the third argument is not a valid number then set the cursor size to the default
-            if (atoi(argv[3]) == 0) {
-                setCursorBlink(1, 25);
-            }
-            // else set the cursor size to the third argument
-            else {
-                setCursorBlink(1, atoi(argv[3]));
-            }
+            setCursorBlink(1);
             return 0;
         }
         // if the second argument is off then disable the cursor blink
         if (strcmp(argv[2], "off") == 0) {
-            setCursorBlink(0, 0);
+            setCursorBlink(0);
             return 0;
         }
         // if the second argument is not on or off then display the help function
         doHelp();
         return 1;
     }
+
+    // if the first argument is size then set the cursor size
+    if (strcmp(argv[1], "size") == 0) {
+        // if there is not two arguments then display the help function
+        if (argc < 3) {
+            doHelp();
+            return 1;
+        }
+        // set the cursor size to the size, if it is not a valid number then the invalid number defaults to 25
+        setCursorSize(atoi(argv[2]));
+        return 0;
+    }
+
+    // if the first argument is show then toggle the cursor visibility
+    if (strcmp(argv[1], "show") == 0) {
+        // if there is not two arguments then display the help function
+        if (argc < 3) {
+            doHelp();
+            return 1;
+        }
+        // if the second argument is on then enable the cursor visibility
+        if (strcmp(argv[2], "on") == 0) {
+            showHideCursor(1);
+            return 0;
+        }
+        // if the second argument is off then disable the cursor visibility
+        if (strcmp(argv[2], "off") == 0) {
+            showHideCursor(0);
+            return 0;
+        }
+        // if the second argument is not on or off then display the help function
+        doHelp();
+        return 1;
+    }
+
     // if it is not a recognized command then display the help function
     doHelp();
 }
