@@ -1,4 +1,4 @@
-# cur
+# cur v2
 A simple plugin for CMD cursor handling.
 
 **Usage**
@@ -11,5 +11,10 @@ A simple plugin for CMD cursor handling.
 
 `` cur set <x> <y>`` - Sets the screen to the coordinates given. If a non-numeric argument is given, the argument is defaulted to 0. **be careful**
 
-`` cur blink <on/off> <opt. 0-100>`` - Enable or disable the cursor blinking. You can also supply an optional argument to change the size of the cursor (100 being full character cell, 0 being smallest), even if the cursor is already on.
+`` cur blink <on/off>`` - Enable or disable the cursor blinking.
+
+``cur size 0-100`` - Set the cursor size. It will turn blinking back on when the size is adjusted.
+
+``cur show <on/off>`` - Show or hide the cursor.
+
 
